@@ -3,9 +3,8 @@ import time
 from flask import jsonify, Flask, request
 
 NAMESPACE = 'logs:endpoint'
-# TODO: remove temporary cors fix for dev, won't be
-# necessary with nginx proxy
-DISABLE_CORS = True
+# only necessary in dev env when runing api/web on separate ports
+DISABLE_CORS = False
 
 app = Flask(__name__)
 
@@ -16,7 +15,7 @@ class Redis:
     @classmethod
     def get_instance(cls):
         if cls._redis is None:
-            cls._redis = redis.Redis(host='localhost', port=6379)
+            cls._redis = redis.Redis(host='redis', port=6379)
         return cls._redis
 
 
@@ -47,7 +46,9 @@ def loggish(endpoint):
     # key:                          value:
     #      logs:endpoint:namespace         unixtime ip
     key = _get_namespace(endpoint)
-    value = '{} {}'.format(time.time(), request.remote_addr)
+    # since we're using nginx to proxy, we want the X-Forwarded-For header
+    ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+    value = '{} {}'.format(time.time(), ip_address)
     Redis.get_instance().rpush(key, value)
     return jsonify({'message': 'hello world'})
 
