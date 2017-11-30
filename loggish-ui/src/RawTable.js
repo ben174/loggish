@@ -16,7 +16,9 @@ class RawTable extends Component {
           {this.props.entries.map(row =>
             <Table.Row key={row.timestamp}>
               <Table.Cell>
-                {row.nativeTimestamp.format('MM/DD/YY HH:mm:ss')}
+                <Header as='h2'>
+                  {row.nativeTimestamp.format('MM/DD/YY HH:mm:ss')}
+                </Header>
               </Table.Cell>
               <Table.Cell>
                 <Header as='h2'>{row.ip}</Header>

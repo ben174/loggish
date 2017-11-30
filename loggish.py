@@ -3,6 +3,9 @@ import time
 from flask import jsonify, Flask, request
 
 NAMESPACE = 'logs:endpoint'
+# TODO: remove temporary cors fix for dev, won't be
+# necessary with nginx proxy
+DISABLE_CORS = True
 
 app = Flask(__name__)
 
@@ -26,16 +29,15 @@ def all_logs():
         endpoint = key.split(':')[2]
         logs.append({'endpoint': endpoint, 'logs': _get_logs(key)})
     response = jsonify({'logset': logs})
-    # TODO: remove
-    response.headers.add('Access-Control-Allow-Origin', '*')
+    if DISABLE_CORS:
+        response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
 
 @app.route('/v1/<endpoint>/logs/')
 def endpoint_logs(endpoint):
-    key = '{}:{}'.format(NAMESPACE, endpoint)
-    # TODO: remove logset stuff
-    ret = {'logset': [{'endpoint': endpoint, 'logs': _get_logs(key)}]}
+    key = _get_namespace(endpoint)
+    ret = {'logs': _get_logs(key)}
     return jsonify(ret)
 
 
@@ -44,7 +46,7 @@ def loggish(endpoint):
     # log this visit with
     # key:                          value:
     #      logs:endpoint:namespace         unixtime ip
-    key = '{}:{}'.format(NAMESPACE, endpoint)
+    key = _get_namespace(endpoint)
     value = '{} {}'.format(time.time(), request.remote_addr)
     Redis.get_instance().rpush(key, value)
     return jsonify({'message': 'hello world'})
@@ -54,3 +56,7 @@ def _get_logs(key):
     entries = Redis.get_instance().lrange(key, 0, -1)
     entries = [e.split() for e in entries]
     return [{'timestamp': e[0], 'ip': e[1]} for e in entries]
+
+
+def _get_namespace(endpoint):
+    return '{}:{}'.format(NAMESPACE, endpoint)

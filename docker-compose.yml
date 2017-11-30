@@ -1,0 +1,11 @@
+web:
+  image: nginx
+  volumes:
+    - ./nginx.conf:/usr/share/nginx/nginx.conf:ro
+
+  command: [nginx-debug, '-g', 'daemon off;']
+
+redis:
+  image: redis
+  ports:
+    - "6379"

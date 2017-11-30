@@ -8,7 +8,7 @@ class AggregateTable extends Component {
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell singleLine>Timestamp</Table.HeaderCell>
-            <Table.HeaderCell>IP Address</Table.HeaderCell>
+            <Table.HeaderCell>IP / Count</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
 
@@ -20,12 +20,6 @@ class AggregateTable extends Component {
               </Table.Cell>
               <Table.Cell>
                 <Table compact>
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.HeaderCell>IP</Table.HeaderCell>
-                      <Table.HeaderCell>Count</Table.HeaderCell>
-                    </Table.Row>
-                  </Table.Header>
                   <Table.Body>
                     {Object.keys(this.props.entries[key]).map(ip =>
                       <Table.Row key={key}>
